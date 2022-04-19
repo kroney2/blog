@@ -1,0 +1,11 @@
+body {
+    font-family: Hack, monospace;
+    background-color: black;
+    color: white;
+}
+.navbar{
+    text-align: center;
+}
+a {
+    color: white;
+}
