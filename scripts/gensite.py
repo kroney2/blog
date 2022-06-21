@@ -4,7 +4,7 @@ import os
 ####
 # Takes MD line, returns eqv HTML
 ##
-def md_to_html(md_line):
+def MDToHTML(md_line):
     out = ''
     if md_line == '\n':
         return out
@@ -39,10 +39,26 @@ def md_to_html(md_line):
         assert(0)
     return out
 
+def InsertLatestPost(LatestPostPath, IndexHTMLStr, nLatestLines):
+    PostHTML = "<h2>Latest Post</h2>\n"
+    with open(os.path.join(POSTS_DIR, PostMDBaseName), 'r') as PostMDFile:
+        for LineIndex, Line in enumerate(PostMDFile.readlines()):
+            PostHTML += MDToHTML(Line)
+            if (LineIndex == nLatestLines - 1):
+                PostHTML += "<p>...</p>"
+                break
+
+    for CharacterIndex, Character in enumerate(IndexHTMLStr):
+        EO = CharacterIndex + len("latest\">")
+        if (IndexHTMLStr[CharacterIndex : EO] == "latest\">"):
+            IndexHTMLStr = IndexHTMLStr[:EO] + PostHTML + IndexHTMLStr[EO:]
+            break
+    return IndexHTMLStr
 ####
 # Naively generate HTML source from MD
 ##
-RAW_HTML_SHARED_FH = '''<!doctype html>
+RAW_HTML_SHARED_FH ='''
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -54,21 +70,38 @@ RAW_HTML_SHARED_FH = '''<!doctype html>
     <body>
         <div class="navbar">
             <a href="index.html">home</a>
-        </div>'''
-RAW_HTML_SHARED_SH = '''</body>
+        </div>
+        '''
+RAW_HTML_SHARED_SH ='''
+</body>
 </html>'''
+
+RAW_INDEX_ONLY = '''
+<div id="latest">
+</div>
+<h2>Posts</h2>
+<div id="posts">
+</div>
+'''
+
 POSTS_DIR = 'posts/'
 PUBLIC_DIR = 'public/'
-with open(os.path.join(PUBLIC_DIR, 'index.html'), 'w') as index_htmlf:
-    index_htmlf.write(RAW_HTML_SHARED_FH)
-    for index, entry in enumerate(os.listdir(POSTS_DIR)):
-        with open(os.path.join(POSTS_DIR, entry), 'r') as posting_mdf:
-            base_name = os.path.splitext(entry)[0] + '.html'
-            out_path = os.path.join(PUBLIC_DIR, base_name)
-            with open(out_path, 'w') as posting_htmlf:
-                posting_htmlf.write(RAW_HTML_SHARED_FH)
-                for line in posting_mdf.readlines():
-                    posting_htmlf.write(md_to_html(line))
-                posting_htmlf.write(RAW_HTML_SHARED_SH)
-        index_htmlf.write('<a href="' + base_name + '">' + base_name.split('_')[0] + '</a>\n')
-    index_htmlf.write(RAW_HTML_SHARED_SH)
+IndexHTMLStr = RAW_HTML_SHARED_FH + RAW_INDEX_ONLY
+LatestPost = None;
+for PostMDBaseName in os.listdir(POSTS_DIR):
+    with open(os.path.join(POSTS_DIR, PostMDBaseName), 'r') as PostMDFile:
+        PostHTMLBaseName = os.path.splitext(PostMDBaseName)[0] + '.html'
+        PostHTMLPath = os.path.join(PUBLIC_DIR, PostHTMLBaseName)
+        with open(PostHTMLPath, 'w') as PostHTMLFile:
+            PostHTMLFile.write(RAW_HTML_SHARED_FH)
+            for Line in PostMDFile.readlines():
+                PostHTMLFile.write(MDToHTML(Line))
+            PostHTMLFile.write(RAW_HTML_SHARED_SH)
+    IndexHTMLStr += '<a href="' + PostHTMLBaseName + '">' + PostHTMLBaseName.split('_')[0] + '</a>\n'
+    if (not LatestPost or int(PostMDBaseName.split('_')[1][:2]) > int(LatestPost.split('_')[1][:2])):
+        LatestPost = PostMDBaseName
+IndexHTMLStr += RAW_HTML_SHARED_SH
+IndexHTMLStr = InsertLatestPost(os.path.join(POSTS_DIR, LatestPost), IndexHTMLStr, 5);
+
+with open(os.path.join(PUBLIC_DIR, 'index.html'), 'w') as IndexHTMLFile:
+    IndexHTMLFile.write(IndexHTMLStr)
