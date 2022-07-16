@@ -90,6 +90,8 @@ RAW_HTML_SHARED_FH ='''
     <body>
         <div class="navbar">
             <a href="index.html">home</a>
+            <a href="caleb_resume.pdf">resume</a>
+            <a href="https://github.com/kroney2">github</a>
         </div>
         '''
 RAW_HTML_SHARED_SH ='''

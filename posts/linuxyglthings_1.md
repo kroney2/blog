@@ -1,6 +1,6 @@
 # "X11, GLX and a math header" -- 07/16/2022
 
-![Nice alt text](../images/pyrimid.png "a pyrimid loaded from an OBJ file")
+![Nice alt text](./images/pyrimid.png "a pyrimid loaded from an OBJ file")
 
 Quite a bit of progress has been made over the past couple of weeks. ( if you consider getting a pyrimid on the screen "quite a bit of progress" ) Most of my time was spent on the linux platform layer and learning more about the X11/GLX APIs.
 Significant things that were built out include:
